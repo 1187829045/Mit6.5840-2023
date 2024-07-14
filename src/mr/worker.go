@@ -1,33 +1,34 @@
 package mr
 
-import "fmt"
-import "log"
-import "net/rpc"
+import (
+	"fmt"
+	"log"
+	"net/rpc"
+)
 import "hash/fnv"
 
+//给 coordinator 发送 rpc 请求分配任务；
+//给 coordinator 发送 rpc 通知任务完成；
+//自身状态控制，准确来说是 coordinator 不需要 worker 工作时，通知 worker 结束运行；
 
-//
-// Map functions return a slice of KeyValue.
-//
+// Map 函数返回 KeyValue 的一个切片。
+
 type KeyValue struct {
 	Key   string
 	Value string
 }
 
-//
-// use ihash(key) % NReduce to choose the reduce
-// task number for each KeyValue emitted by Map.
-//
+// 使用 ihash(key) % NReduce 来选择 Reduce
+// Map 发出的每个 KeyValue 的任务编号。
+
 func ihash(key string) int {
 	h := fnv.New32a()
 	h.Write([]byte(key))
 	return int(h.Sum32() & 0x7fffffff)
 }
 
+// main/mrworker.go 调用此函数。
 
-//
-// main/mrworker.go calls this function.
-//
 func Worker(mapf func(string, string) []KeyValue,
 	reducef func(string, []string) string) {
 
@@ -35,43 +36,37 @@ func Worker(mapf func(string, string) []KeyValue,
 
 	// uncomment to send the Example RPC to the coordinator.
 	// CallExample()
-
 }
 
-//
-// example function to show how to make an RPC call to the coordinator.
-//
-// the RPC argument and reply types are defined in rpc.go.
-//
+// 示例函数展示如何向协调器发出 RPC 调用。
+// RPC 参数和回复类型在 rpc.go 中定义
+
 func CallExample() {
 
-	// declare an argument structure.
+	// 声明一个参数结构体。
 	args := ExampleArgs{}
 
-	// fill in the argument(s).
+	// 填充参数。
 	args.X = 99
 
-	// declare a reply structure.
+	// 声明一个回复结构体。
 	reply := ExampleReply{}
 
-	// send the RPC request, wait for the reply.
-	// the "Coordinator.Example" tells the
-	// receiving server that we'd like to call
-	// the Example() method of struct Coordinator.
+	// 发送RPC请求，等待回复。
+	// "Coordinator.Example" 告诉接收服务器我们要调用 Coordinator 结构体的 Example() 方法。
 	ok := call("Coordinator.Example", &args, &reply)
 	if ok {
-		// reply.Y should be 100.
+		// reply.Y 应该是 100。
 		fmt.Printf("reply.Y %v\n", reply.Y)
 	} else {
-		fmt.Printf("call failed!\n")
+		fmt.Printf("调用失败！\n")
 	}
 }
 
-//
-// send an RPC request to the coordinator, wait for the response.
-// usually returns true.
-// returns false if something goes wrong.
-//
+// 向协调器发送一个RPC请求，并等待响应。
+// 通常返回 true。
+// 如果出现问题，则返回 false。
+
 func call(rpcname string, args interface{}, reply interface{}) bool {
 	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
 	sockname := coordinatorSock()

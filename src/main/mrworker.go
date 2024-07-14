@@ -1,14 +1,11 @@
 package main
 
-//
-// start a worker process, which is implemented
-// in ../mr/worker.go. typically there will be
-// multiple worker processes, talking to one coordinator.
+// 启动一个工作进程，该进程在 ../mr/worker.go 中实现。通常会有
+// 多个工作进程，与一个协调器通信。
 //
 // go run mrworker.go wc.so
 //
-// Please do not change this file.
-//
+// 请不要更改此文件
 
 import "6.5840/mr"
 import "plugin"
@@ -27,8 +24,8 @@ func main() {
 	mr.Worker(mapf, reducef)
 }
 
-// load the application Map and Reduce functions
-// from a plugin file, e.g. ../mrapps/wc.so
+// 从插件文件加载应用程序 Map 和 Reduce 函数
+//，例如 ../mrapps/wc.so
 func loadPlugin(filename string) (func(string, string) []mr.KeyValue, func(string, []string) string) {
 	p, err := plugin.Open(filename)
 	if err != nil {
